@@ -130,4 +130,15 @@ static constexpr float BARREL_MIN_HEIGHT = 135.6f;
 static constexpr float BARREL_LEVEL_HEIGHT = 172.8f; 
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 6000;
 };//struct GIMBAL_CONSTANTS
+
+struct FEEDER_PID
+{
+    static constexpr float
+    PID_KP = 800.0f,
+    PID_KI = 0.5f,
+    PID_KD = 0.0f,
+    PID_MAX_OUT = 10000.0f,
+    PID_MAX_IOUT = 9000.0f;
+};  // struct FEEDER_PID
+
 #endif

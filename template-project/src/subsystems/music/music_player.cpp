@@ -2,19 +2,18 @@
 
 namespace music{
 
-MusicPlayer::MusicPlayer(src::Drivers *drivers, MusicDisk score) :
-    drivers(drivers), score(score), tempo(QUARTERNOTELENGTH) {}
+MusicPlayer::MusicPlayer(src::Drivers *drivers, const vector<pair<float, float>>& score, unsigned tempo) :
+    drivers(drivers), yourSong(score), tempo(tempo) {}
 
 void MusicPlayer::execute() {
-    vector<pair<float, float>> currDisk = score.getScore();
-    drivers->leds.set(drivers->leds.Red, currDisk.size() < 100);
-    drivers->leds.set(drivers->leds.Green, currDisk.size() > 100);
-    for(size_t i = 0; i < currDisk.size(); i++){
+    drivers->leds.set(drivers->leds.Red, yourSong.size() < 1);
+    drivers->leds.set(drivers->leds.Green, yourSong.size() > 1);
+    for(size_t i = 0; i < yourSong.size(); i++){
         drivers->leds.set(drivers->leds.Blue, true);
-        tap::buzzer::playNote(&drivers->pwm, (currDisk[i]).first);
-        modm::delay_ms(tempo * (currDisk[i]).second * 0.8f);
+        tap::buzzer::playNote(&drivers->pwm, (yourSong[i]).first);
+        modm::delay_ms(tempo * (yourSong[i]).second * 0.8f);
         tap::buzzer::playNote(&(drivers->pwm), 0);
-        modm::delay_ms(tempo * (currDisk[i]).second * 0.2f);
+        modm::delay_ms(tempo * (yourSong[i]).second * 0.2f);
     }
     tap::buzzer::playNote(&(drivers->pwm), 0); //silences buzzer
     drivers->leds.set(drivers->leds.Blue, false);

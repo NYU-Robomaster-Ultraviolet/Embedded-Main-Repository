@@ -8,8 +8,8 @@ using namespace std;
 namespace music{
 
 //establishes tempo
-static const unsigned TEMPO = 166; //in ms this is = 60 BPM
-static const unsigned QUARTERNOTELENGTH = 60000 / TEMPO; //60000 = 1 min in ms
+static const unsigned NEVER_SURRENDER_TEMPO = 166; //in ms this is = 60 BPM
+static const unsigned NEVER_SURRENDER_BPM = 60000 / NEVER_SURRENDER_TEMPO; //60000 = 1 min in ms
 
 /*this is the vector that contains your song Each element of the vector are floats
 The first: containing the note to be played, see the noteshpp file to see the frequencies used
@@ -19,9 +19,10 @@ The second: represents the amount of time that a note should be played for. This
 Note: If you want a rest, put the note value as 0.0f
 */
 
-const vector<pair<float, float>> YOURSONG{
+const vector<pair<float, float>> NEVER_SURRENDER{
     
 //Never Surrender - Mizuki Nana
+//4/4 time
 
 //measure 1
 pair<float, float>(O5C, NE),

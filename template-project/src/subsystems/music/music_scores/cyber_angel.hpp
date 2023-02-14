@@ -8,8 +8,8 @@ using namespace std;
 namespace music{
 
 //establishes tempo
-static const unsigned TEMPO = 120; //in ms this is = 60 BPM
-static const unsigned QUARTERNOTELENGTH = 60000 / TEMPO; //60000 = 1 min in ms
+static const unsigned CYBER_ANGEL_TEMPO = 120; //in ms this is = 60 BPM
+static const unsigned CYBER_ANGEL_BPM = 60000 / CYBER_ANGEL_TEMPO; //60000 = 1 min in ms
 
 /*this is the vector that contains your song Each element of the vector are floats
 The first: containing the note to be played, see the noteshpp file to see the frequencies used
@@ -19,7 +19,11 @@ The second: represents the amount of time that a note should be played for. This
 Note: If you want a rest, put the note value as 0.0f
 */
 
-const vector<pair<float, float>> YOURSONG{
+const vector<pair<float, float>> CYBER_ANGEL{
+
+//Cyber Angel - Hanser
+//4/4 time
+
 //measure 1
 pair<float, float>(O4FS, NDE),
 pair<float, float>(O4FS, NDE),
@@ -116,8 +120,8 @@ pair<float, float>(O4AS, NQ),
 pair<float, float>(O4DS, NE),
 pair<float, float>(O4FS, NE),
 //measure 15
-pair<float, float>(O4AS, NDE),
-pair<float, float>(O3B, NDE),
+pair<float, float>(O4AS, NDE), 
+pair<float, float>(O3B, NDE), 
 pair<float, float>(O4AS, NDE),
 pair<float, float>(O4GS, NDE),
 pair<float, float>(O4FS, NDE),
@@ -132,7 +136,7 @@ pair<float, float>(O4DS, NE),
 pair<float, float>(O4F, NE),
 //measure 18: melody 3 New Key Signature
 pair<float, float>(O4G, NQ),
-pair<float, float>(O5C, NQ),
+pair<float, float>(O5C, NQ), //change from C
 pair<float, float>(O4AS, NDE),
 pair<float, float>(O4G, NDE),
 pair<float, float>(O4F, NE),
@@ -148,8 +152,8 @@ pair<float, float>(O4G, NDE),
 pair<float, float>(O4C, NDE),
 pair<float, float>(O4G, NE),
 pair<float, float>(O4F, NQ),
-pair<float, float>(O3AS, NDE),
-pair<float, float>(O4F, NDE),
+pair<float, float>(O3AS, NE),
+pair<float, float>(O4F, NE),
 //measure 21
 pair<float, float>(O4GS, NDE),
 pair<float, float>(O4AS, NDE),

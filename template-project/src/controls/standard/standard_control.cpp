@@ -11,11 +11,15 @@
 
 #include "subsystems/chassis/chassis_subsystem.hpp"
 #include "subsystems/gimbal/gimbal_subsystem.hpp"
+#include "subsystems/feeder/feeder_subsystem.hpp"
+#include "subsystems/shooter/shooter_subsystem.hpp"
 
+#include "subsystems/shooter/shoot_user_command.hpp"
 #include "subsystems/chassis/chassis_movement_command.hpp"
 #include "subsystems/gimbal/gimbal_movement_command.hpp"
 #include "subsystems/music/music_player.hpp"
 #include "subsystems/gimbal/gimbal_motor_interface.hpp"
+#include "subsystems/feeder/feeder_movement_command.hpp"
 
 
 src::driversFunc drivers = src::DoNotUse_getDrivers;
@@ -26,36 +30,51 @@ using namespace tap::communication::serial;
 using namespace chassis;
 using namespace gimbal;
 using namespace music;
+using namespace feeder;
+using namespace shooter;
 
 namespace src::control{
 // Define subsystems here ------------------------------------------------
 ChassisSubsystem chassis(drivers());
 GimbalSubsystem gimbal(drivers());
+FeederSubsystem feeder(drivers());
+ShooterSubsystem shooter(drivers());
 // Robot Specific Controllers ------------------------------------------------
-MusicDisk disk;
-MusicPlayer sound_track(drivers(), disk);
+MusicPlayer sound_track(drivers(), PIANO_MAN, PIANO_MAN_BPM);
 GimbalInterface gimbalInterface(&gimbal);
 
 // Define commands here ---------------------------------------------------
 ChassisMovementCommand chassisMovement(&chassis, drivers(), &gimbalInterface);
 GimbalMovementCommand gimbalMovement(&gimbal, drivers());
+FeederMovementCommand feederMovement(&feeder, drivers());
+ShootUserCommand shootUser(&shooter, drivers());
+
 // Define command mappings here -------------------------------------------
 HoldCommandMapping rightSwitchMid(drivers(), {&chassisMovement, &gimbalMovement}, 
 RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 HoldCommandMapping rightSwitchUp(drivers(), {&gimbalMovement}, 
 RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+HoldCommandMapping leftSwitchDown(drivers(), {&feederMovement},
+RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+HoldCommandMapping leftSwitchUp(drivers(), {&shootUser}, 
+RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 // Register subsystems here -----------------------------------------------
 void registerSubsystems(src::Drivers *drivers){
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&gimbal);
+    drivers->commandScheduler.registerSubsystem(&feeder);
+    drivers->commandScheduler.registerSubsystem(&shooter);
 }
 // Initialize subsystems here ---------------------------------------------
 void initializeSubsystems() {
-    //drivers()->leds.set(drivers()->leds.Red, true);
+    //sound_track.execute();
     chassis.initialize();
     gimbal.initialize();
-    //sound_track.execute();
+    feeder.initialize();
+    shooter.initialize();
 }
 // Set default command here -----------------------------------------------
 void setDefaultCommands(src::Drivers* drivers) {
@@ -69,6 +88,8 @@ void startupCommands(src::Drivers* drivers) {
 void registerIOMappings(src::Drivers* drivers) {
     drivers->commandMapper.addMap(&rightSwitchMid);
     //drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
 }
 }//namespace src::control
 
