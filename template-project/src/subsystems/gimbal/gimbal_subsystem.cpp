@@ -5,7 +5,7 @@ namespace gimbal{
 
 //constructor
 GimbalSubsystem::GimbalSubsystem(src::Drivers *drivers)
-    : tap::control::Subsystem(drivers), 
+    : tap::control::Subsystem(drivers),
     yawMotor(drivers,
                constants.YAW_MOTOR_ID,
                constants.CAN_BUS_MOTORS,
@@ -49,7 +49,7 @@ void GimbalSubsystem::initialize(){
     targetPitch = startingPitch;
 }
 
-void GimbalSubsystem::refresh(){ 
+void GimbalSubsystem::refresh(){
     u_int32_t currentTime = tap::arch::clock::getTimeMilliseconds();
     timeError = currentTime - pastTime;
     pastTime = currentTime;
@@ -127,10 +127,29 @@ void GimbalSubsystem::controllerInput(float yawInput, float pitchInput){
     inputsFound = true;
 }
 
-//this is the function that is called when CV team is sending offset angles through UART
-void GimbalSubsystem::cvInput(float yawInput, float pitchInput){
-    //setYawAngle(yawInput);
-    setPitchAngle(pitchInput);
+/**
+ * @brief This is the function that is called when CV team is sending offset angles through UART
+ *
+ * @param yawInput  new yaw value; should be between -2 PI and 2 PI, exclusive
+ * @param pitchInput  new pitch value; should be between -2 PI and 2 PI, exclusive
+ */
+void GimbalSubsystem::cvInput(float yawInput, float pitchInput) {
+    // calculates shortest way to rotate (i.e. 3pi/2 is same as -pi/2)
+    if (yawInput > M_PI) {
+        yawInput -= 2 * M_PI;
+    } else if (yawInput < -M_PI) {
+        yawInput += 2 * M_PI;
+    }
+
+    if (pitchInput > M_PI) {
+        pitchInput -= 2 * M_PI;
+    } else if (pitchInput < -M_PI) {
+        pitchInput += 2 * M_PI;
+    }
+
+    // adds inputted angle to current angle
+    setYawAngle(currentYaw + yawInput);
+    setPitchAngle(targetPitch + pitchInput);
     inputsFound = true;
 }
 
