@@ -8,80 +8,82 @@
 #include "controls/standard/standard_constants.hpp"
 #include "drivers.hpp"
 
-
 namespace chassis
 {
 /**
  * A bare bones Subsystem for interacting with a 4 wheeled chassis.
  */
+
 class ChassisSubsystem : public tap::control::Subsystem
 {
 public:
     /**
-     * This max output is measured in the c620 robomaster translated current.
-     * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
-     * The corresponding speed controller output torque current range is
-     * -20 ~ 0 ~ 20 A.
-     *
-     * For this demo, we have capped the output at 8000. This should be more
-     * than enough for what you are doing.
-     */
-    static constexpr float MAX_CURRENT_OUTPUT = 8000.0f;
-
-    /**
      * Constructs a new ChassisSubsystem with default parameters specified in
      * the private section of this class.
      */
-    ChassisSubsystem(tap::Drivers *drivers)
-        : tap::control::Subsystem(drivers),
-          frontLeftMotor(drivers, FRONT_LEFT_MOTOR_ID, CAN_BUS_MOTORS, false, "front left motor"),
-          frontRightMotor(drivers, FRONT_RIGHT_MOTOR_ID, CAN_BUS_MOTORS, true, "front right motor"),
-          backLeftMotor(drivers, BACK_LEFT_MOTOR_ID, CAN_BUS_MOTORS, false, "back left motor"),
-          backRightMotor(drivers, BACK_RIGHT_MOTOR_ID, CAN_BUS_MOTORS, true, "back right motor"),
-          frontLeftPid(CHASSIS_MOTOR_KP,CHASSIS_MOTOR_KI,CHASSIS_MOTOR_KD,CHASSIS_MOTOR_MAX_IOUT,CHASSIS_MOTOR_MAX_OUT),
-          frontRightPid(CHASSIS_MOTOR_KP,CHASSIS_MOTOR_KI,CHASSIS_MOTOR_KD,CHASSIS_MOTOR_MAX_IOUT,CHASSIS_MOTOR_MAX_OUT),
-          backLeftPid(CHASSIS_MOTOR_KP,CHASSIS_MOTOR_KI,CHASSIS_MOTOR_KD,CHASSIS_MOTOR_MAX_IOUT,CHASSIS_MOTOR_MAX_OUT),
-          backRightPid(CHASSIS_MOTOR_KP,CHASSIS_MOTOR_KI,CHASSIS_MOTOR_KD,CHASSIS_MOTOR_MAX_IOUT,CHASSIS_MOTOR_MAX_OUT),
-          frontLeftDesiredRpm(0),
-          frontRightDesiredRpm(0),
-          backLeftDesiredRpm(0),
-          backRightDesiredRpm(0)
-    {
-    }
+    ChassisSubsystem(src::Drivers *drivers);
 
+    //updates the string with the encoder values of the motors
+    void updateWheelvalues();
+
+    //sends a copy of the string detailing motor encoder information
+    std::string getUartOutput(){return outputString;}
+
+    //copy controls
     ChassisSubsystem(const ChassisSubsystem &other) = delete;
 
     ChassisSubsystem &operator=(const ChassisSubsystem &other) = delete;
 
+    //default deconstructor
     ~ChassisSubsystem() = default;
 
+    /**
+     * Called when Subsystem is registered
+     * initializes motors 
+     */
     void initialize() override;
 
     /**
-     * No-op function that is a placeholder because all interactions with motors are done
-     * in setDesiredOutput.
+     * Called continously as long as robot is running
+     * Updates the Pid calculator with desired outputs
      */
     void refresh() override;
 
+    /**
+     * @param x : right and left inputs from controller
+     * @param y : foward and backward inputs from controller
+     * @param r : rotation from left or right inputs from controller 
+     * calculate the desired rpm of each wheel to have the desired movement
+     */
     void setDesiredOutput(float x, float y, float r);
 
+    /**
+     * @param pid : the pid calculator for the given motor
+     * @param motor : the motor that needs to be updated
+     * @param desiredRpm : the desired rpm set for tht motor
+     * using pid calculator to calculate a rpm to set to given motor to after feeding the calculator
+     * the desiredRpm
+     */
     void updateRpmPid(modm::Pid<float>* pid, tap::motor::DjiMotor* const motor, float desiredRpm);
 
+    //checks if every motor is online
     bool motorOnline() {return frontLeftMotor.isMotorOnline() && frontRightMotor.isMotorOnline() && 
     backLeftMotor.isMotorOnline() && backRightMotor.isMotorOnline();}
 
+    //converts the motor absolute encoder value to radians
+    inline float wrappedEncoderValueToRadians(int64_t encoderValue) {
+        return (M_TWOPI * static_cast<float>(encoderValue)) / tap::motor::DjiMotor::ENC_RESOLUTION;
+    }
+
+    //getters for each motor
     const tap::motor::DjiMotor &getFrontLeftMotor() const { return frontLeftMotor; }
     const tap::motor::DjiMotor &getFrontRightMotor() const { return frontRightMotor; }
     const tap::motor::DjiMotor &getBackLeftMotor() const { return backLeftMotor; }
     const tap::motor::DjiMotor &getBackRightMotor() const { return backRightMotor; }
 
 private:
-    ///< Hardware constants, not specific to any particular chassis.
-    static constexpr tap::motor::MotorId FRONT_LEFT_MOTOR_ID = tap::motor::MOTOR3;
-    static constexpr tap::motor::MotorId FRONT_RIGHT_MOTOR_ID = tap::motor::MOTOR4;
-    static constexpr tap::motor::MotorId BACK_RIGHT_MOTOR_ID = tap::motor::MOTOR1;
-    static constexpr tap::motor::MotorId BACK_LEFT_MOTOR_ID = tap::motor::MOTOR2;
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+    //all constants used in this subsystem
+    CHASSIS_CONSTANTS constants;
 
     ///< Motors.  Use these to interact with any dji style motors.
     tap::motor::DjiMotor frontLeftMotor;
@@ -100,10 +102,8 @@ private:
     float frontRightDesiredRpm;
     float backLeftDesiredRpm;
     float backRightDesiredRpm;
-
-    // Scale factor for converting joystick movement into RPM setpoint
-    static constexpr float RPM_SCALE_FACTOR = 4000.0f;
-
+    //
+    std::string outputString;
 };  // class ChassisSubsystem
 
 }  // namespace chassis

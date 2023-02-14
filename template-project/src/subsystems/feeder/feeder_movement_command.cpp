@@ -24,7 +24,7 @@ void  FeederMovementCommand::initialize() {feeder->setTargetRPM(0);}
 
 void  FeederMovementCommand::execute()
 {
-    feeder->setTargetRPM(10000);
+    feeder->setTargetRPM(1500);
     //if(feeder->motorOnline()) drivers->leds.set(drivers->leds.Blue, true);
     //else drivers->leds.set(drivers->leds.Red, true);
 }

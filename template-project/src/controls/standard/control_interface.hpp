@@ -28,6 +28,8 @@ class ControlInterface{
         LinearInterpolationPredictor chassisRotationInput;
     public:
         ControlInterface(tap::Drivers *drivers) : drivers(drivers) {}
+
+        //final inputs 
         mockable float getChassisXInput();
         mockable float getChassisYInput();
         mockable float getChassisRotationInput();

@@ -24,10 +24,10 @@ void  ShootUserCommand::initialize() {}
 
 void  ShootUserCommand::execute()
 {
-    shooter->setDesiredOutput(0.5f);
+    shooter->setDesiredOutput(0.3f);
 }
 
-void  ShootUserCommand::end(bool) { shooter->setDesiredOutput(0.25f); }
+void  ShootUserCommand::end(bool) {} //shooter->setDesiredOutput(0.2f); }
 
 bool  ShootUserCommand::isFinished() const { return false; }
 }  // namespace chassis

@@ -37,7 +37,7 @@ public:
      */
     ShooterSubsystem(tap::Drivers *drivers)
         : tap::control::Subsystem(drivers),
-        flywheelRamp(0.05f, 0.05f, 0.25f)
+        flywheelRamp(0.05f, 0.05f, 0.15f)
     {
     }
 

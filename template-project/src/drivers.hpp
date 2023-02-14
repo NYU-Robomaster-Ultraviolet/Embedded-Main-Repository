@@ -22,6 +22,7 @@
 
 #include "tap/drivers.hpp"
 #include "controls/standard/control_interface.hpp"
+#include "controls/standard/imu_interface.hpp"
 
 namespace src
 {
@@ -34,10 +35,14 @@ public:
 #endif
     Drivers() : 
         tap::Drivers(),
-        control_interface(this) {}
+        control_interface(this),
+        imu_rad_interface(this)
+         {}
 
 public:
     src::control::ControlInterface control_interface;
+    ImuRadInterface imu_rad_interface;
+    
 };  // class Drivers
 
 }  // namespace src

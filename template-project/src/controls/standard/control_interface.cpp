@@ -16,8 +16,10 @@ namespace src::control{
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
 
+    float keyboardX = drivers->remote.keyPressed(Remote::Key::D) - drivers->remote.keyPressed(Remote::Key::A);
+
     if (prevUpdateCounterX != updateCounter) {
-        chassisXInput.update(drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL), currTime);
+        chassisXInput.update(drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) + keyboardX, currTime);
         prevUpdateCounterX = updateCounter;
     }
 
@@ -36,8 +38,10 @@ namespace src::control{
         uint32_t updateCounter = drivers->remote.getUpdateCounter();
         uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
 
+        float keyboardY = drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
+
         if (prevUpdateCounterY != updateCounter) {
-            chassisYInput.update(drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL), currTime);
+            chassisYInput.update(drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) + keyboardY, currTime);
             prevUpdateCounterY = updateCounter;
         }
 
@@ -61,17 +65,21 @@ namespace src::control{
             prevUpdateCounterRotation = updateCounter;
         }
 
+        float keyBoardR = drivers->remote.keyPressed(Remote::Key::X) - drivers->remote.keyPressed(Remote::Key::Z);  
+
         //float finalRotation = limitVal<float>((chassisRotationInput.getInterpolatedValue(currTime)) * Y_SENSITIVITY, -Y_SENSITIVITY, Y_SENSITIVITY);
-        float finalRotation = limitVal<float>((chassisRotationInput.getInterpolatedValue(currTime)), -1, 1);
+        float finalRotation = limitVal<float>((chassisRotationInput.getInterpolatedValue(currTime) + keyBoardR), -1, 1);
 
         return finalRotation;
     }
 
     float ControlInterface::getGimbalYawInput() {
-        return limitVal<float>(-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), -1, 1);
+        float MouseX = drivers->remote.getMouseX(); 
+        return limitVal<float>(-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) + MouseX, -1, 1);
     }
 
     float ControlInterface::getGimbalPitchInput() {
-        return limitVal<float>(drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL), -1, 1);
+        float MouseY = drivers->remote.getMouseY();
+        return limitVal<float>(drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) + MouseY, -1, 1);
     }
 }
