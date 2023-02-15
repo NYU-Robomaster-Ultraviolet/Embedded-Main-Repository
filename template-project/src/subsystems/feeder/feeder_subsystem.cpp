@@ -15,8 +15,6 @@ void FeederSubsystem::initialize()
 
 void FeederSubsystem::refresh() {
     updateFeederPid(&rpmPid, &feederMotor, targetRPM);
-    drivers->leds.set(drivers->leds.Blue, motorOnline());
-    drivers->leds.set(drivers->leds.Red, !motorOnline());
 }
 
 void FeederSubsystem::updateFeederPid(modm::Pid<float>* pid, tap::motor::DjiMotor* const motor, float desiredRpm) {

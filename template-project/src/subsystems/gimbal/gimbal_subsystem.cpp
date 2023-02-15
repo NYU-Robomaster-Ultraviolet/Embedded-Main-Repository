@@ -37,8 +37,8 @@ void GimbalSubsystem::initialize(){
     yawMotor.setDesiredOutput(0);
     pitchMotor.initialize();
     pitchMotor.setDesiredOutput(0);
-    uint32_t currentPitchEncoder = pitchMotor.getEncoderUnwrapped();
-    uint32_t currentYawEncoder = yawMotor.getEncoderUnwrapped();
+    uint32_t currentPitchEncoder = pitchMotor.getEncoderWrapped();
+    uint32_t currentYawEncoder = yawMotor.getEncoderWrapped();
     startingPitchEncoder = wrappedEncoderValueToRadians(currentPitchEncoder);
     startingYawEncoder = wrappedEncoderValueToRadians(currentYawEncoder);
     startingPitch = startingPitchEncoder;
@@ -60,6 +60,7 @@ void GimbalSubsystem::refresh(){
             uint32_t currentYawEncoder = yawMotor.getEncoderWrapped();
             currentYaw = wrappedEncoderValueToRadians(currentYawEncoder);
             updateYawPid();
+            
         }
         if(pitchMotor.isMotorOnline()){
             currentPitchMotorSpeed = getPitchMotorRPM();
@@ -82,26 +83,32 @@ inline float GimbalSubsystem::wrappedEncoderValueToRadians(int64_t encoderValue)
 //this function will use the angel pid to determine the angel the robot will need to move to, then use a motor speed pid to change
 //the motor speed accordingly
 void GimbalSubsystem::updateYawPid(){
+    float movement = targetYaw;
     //makes sure that error does not exceded maximum error in either side to maintain better control
-    if(targetYaw - currentYaw > constants.MAX_YAW_ERROR) targetYaw = currentYaw + constants.MAX_YAW_ERROR;
-    else if(targetYaw - currentYaw < -constants.MAX_YAW_ERROR) targetYaw = currentYaw - constants.MAX_YAW_ERROR;
+    if(movement - currentYaw > constants.MAX_YAW_ERROR) movement = currentYaw + constants.MAX_YAW_ERROR;
+    else if(movement - currentYaw < -constants.MAX_YAW_ERROR) movement = currentYaw - constants.MAX_YAW_ERROR;
     //find error
-    yawError = (targetYaw - currentYaw) * constants.MOTOR_SPEED_FACTOR;
+    yawError = (movement - currentYaw);
+    //makes sure that turn flag matches
+    if(rightTurnFlag && yawError < 0) yawError += M_TWOPI;
+    else if(!rightTurnFlag && yawError > 0) yawError -= M_TWOPI;
+    drivers->leds.set(drivers->leds.Blue, yawError > 0);
+    drivers->leds.set(drivers->leds.Red, yawError < 0);
     if(-(constants.YAW_MINIMUM_RADS) < yawError && yawError < constants.YAW_MINIMUM_RADS){
         yawMotor.setDesiredOutput(0.0f);
     }
     else{
-        yawMotorPid.runController(yawError, getYawMotorRPM(), timeError);
+        yawMotorPid.runController(yawError * constants.MOTOR_SPEED_FACTOR, getYawMotorRPM(), timeError);
         yawMotorOutput = limitVal<float>(yawMotorPid.getOutput(), -constants.MAX_YAW_SPEED, constants.MAX_YAW_SPEED);
         if(-constants.MIN_YAW_SPEED < yawMotorOutput  && yawMotorOutput < constants.MIN_YAW_SPEED) yawMotorOutput = 0;
-        yawMotor.setDesiredOutput(yawMotorOutput);
+        //yawMotor.setDesiredOutput(yawMotorOutput);
     }
 }
 
 //updates the pitch angle
 void GimbalSubsystem::updatePitchPid(){
-    pitchError = (targetPitch - currentPitch) * constants.MOTOR_SPEED_FACTOR;
-    pitchMotorPid.runController(pitchError, getPitchMotorRPM(), timeError);
+    pitchError = (targetPitch - currentPitch);
+    pitchMotorPid.runController(pitchError * constants.MOTOR_SPEED_FACTOR, getPitchMotorRPM(), timeError);
     if(-(constants.PITCH_MINIMUM_RADS) < pitchError && pitchError < constants.PITCH_MINIMUM_RADS){
         pitchMotorOutput = 0;
     }
@@ -122,7 +129,9 @@ float GimbalSubsystem::gravityCompensation(){
 
 //this is the function that is called through the remote control input
 void GimbalSubsystem::controllerInput(float yawInput, float pitchInput){
-    setYawAngle(currentYaw + (yawInput * constants.YAW_SCALE));
+    if(yawInput < 0)rightTurnFlag = false;
+    else rightTurnFlag = true;
+    setYawAngle(targetYaw + (yawInput * constants.YAW_SCALE));
     setPitchAngle(targetPitch + (pitchInput * constants.PITCH_SCALE));
     inputsFound = true;
 }
@@ -136,19 +145,21 @@ void GimbalSubsystem::controllerInput(float yawInput, float pitchInput){
 void GimbalSubsystem::cvInput(float yawInput, float pitchInput) {
     // calculates shortest way to rotate (i.e. 3pi/2 is same as -pi/2)
     if (yawInput > M_PI) {
-        yawInput -= 2 * M_PI;
+        yawInput -= M_TWOPI;
     } else if (yawInput < -M_PI) {
-        yawInput += 2 * M_PI;
+        yawInput += M_TWOPI;
     }
 
     if (pitchInput > M_PI) {
-        pitchInput -= 2 * M_PI;
+        pitchInput -= M_TWOPI;
     } else if (pitchInput < -M_PI) {
-        pitchInput += 2 * M_PI;
+        pitchInput += M_TWOPI;
     }
 
+    if(yawInput < 0)rightTurnFlag = false;
+    else rightTurnFlag = true;
     // adds inputted angle to current angle
-    setYawAngle(currentYaw + yawInput);
+    setYawAngle(targetYaw + yawInput);
     setPitchAngle(targetPitch + pitchInput);
     inputsFound = true;
 }

@@ -29,7 +29,12 @@ public:
 
     static inline float wrappedEncoderValueToRadians(int64_t encoderValue);
 
-    void setYawAngle(float angle) { targetYaw = angle;}
+    void setYawAngle(float angle) { 
+        if(angle > M_TWOPI) angle -= M_TWOPI;
+        else if(angle < 0) angle += 2* M_TWOPI;
+        targetYaw = angle;
+    
+    }
 
     void setPitchAngle(float angle) {targetPitch = limitVal<float>(angle , constants.PITCH_MIN_ANGLE , 
         constants.PITCH_MAX_ANGLE);}
@@ -94,6 +99,9 @@ private:
     //current angles in radians
     float currentYaw;
     float currentPitch;
+
+    //yaw flag to determine direction 1 = right 0 = left
+    bool rightTurnFlag;
 
     //desired error angles
     float yawError;

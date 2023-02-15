@@ -33,8 +33,6 @@ void  ChassisMovementCommand::execute()
     float xOutput = ((cosYaw * xInput) - (sinYaw * yInput));
     float yOutput = ((cosYaw * yInput) + (sinYaw * xInput));
     //sends values to the chassis subsystem
-    drivers->leds.set(drivers->leds.Blue, gimbalInterface->getYawEncoder() > 0.0174533);
-    drivers->leds.set(drivers->leds.Red, gimbalInterface->getYawEncoder() < 0.0174533);
     chassis->setDesiredOutput(
         xOutput,
         yOutput,

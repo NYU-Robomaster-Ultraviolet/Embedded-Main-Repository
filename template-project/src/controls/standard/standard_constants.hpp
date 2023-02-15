@@ -77,7 +77,7 @@ struct GIMBAL_CONSTANTS{
     };
 
     static constexpr tap::algorithms::SmoothPidConfig PITCH_PID = {
-        .kp = 1850.0f,
+        .kp = 550.0f, //1850.0f
         .ki = 0.0f,
         .kd = 150.0f,
         .maxICumulative = 10.0f,
@@ -98,8 +98,7 @@ static constexpr float MOTOR_SPEED_FACTOR = 200.0f;
 
 //the value in which controller inputs are multiplied by for gimbal movement, basically sensitivity
 static constexpr float YAW_SCALE = 0.25f;
-static constexpr float PITCH_SCALE = 0.0075f;
-
+static constexpr float PITCH_SCALE = 0.01f; // 0.0075f
 //Gimbal Starting angles
 static constexpr float YAW_STARTING_ANGLE = 0.0f;
 static constexpr float PITCH_STARTING_ANGLE = 1.57079632679489661923f; //pi / 2
@@ -113,7 +112,7 @@ static constexpr float MIN_PITCH_SPEED = 300.0f;
 static constexpr float MAX_PITCH_SPEED = 20000.0f;
 //Gimbal minimum angles of movement
 static constexpr float YAW_MINIMUM_RADS = .005f;
-static constexpr float PITCH_MINIMUM_RADS = .01f;
+static constexpr float PITCH_MINIMUM_RADS = .0001f;
 //minimum value for pitch RPM to be considered stable
 static constexpr float MIN_PITCH_RPM = .0005f;
 //starting pitch angle from when the robot is turned on 
@@ -128,7 +127,7 @@ static constexpr float LEVEL_ANGLE = 1.5708; //90 degrees
 static constexpr float BARREL_LENGTH = 165.0f; //turret barrel length in mm
 static constexpr float BARREL_MIN_HEIGHT = 135.6f; 
 static constexpr float BARREL_LEVEL_HEIGHT = 172.8f; 
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 6000;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 5800;
 };//struct GIMBAL_CONSTANTS
 
 struct FEEDER_PID
