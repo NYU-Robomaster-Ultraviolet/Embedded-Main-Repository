@@ -31,6 +31,7 @@ GimbalSubsystem::GimbalSubsystem(src::Drivers *drivers)
 
     //initilaizes the gimbal motors and make them not get any power
 void GimbalSubsystem::initialize(){
+    noTurn = true;
     pastTime = tap::arch::clock::getTimeMilliseconds();
     setIMU(0, constants.STARTING_PITCH + constants.LEVEL_ANGLE);
     yawMotor.initialize();
@@ -90,17 +91,21 @@ void GimbalSubsystem::updateYawPid(){
     //find error
     yawError = (movement - currentYaw);
     //makes sure that turn flag matches
-    if(rightTurnFlag && yawError < 0) yawError += M_TWOPI;
-    else if(!rightTurnFlag && yawError > 0) yawError -= M_TWOPI;
+    if(!noTurn){
+        if(rightTurnFlag && yawError < 0) yawError += M_TWOPI;
+        else if(!rightTurnFlag && yawError > 0) yawError -= M_TWOPI;
+    }
     drivers->leds.set(drivers->leds.Blue, yawError > 0);
     drivers->leds.set(drivers->leds.Red, yawError < 0);
     if(-(constants.YAW_MINIMUM_RADS) < yawError && yawError < constants.YAW_MINIMUM_RADS){
         yawMotor.setDesiredOutput(0.0f);
+        noTurn = true;
     }
     else{
         yawMotorPid.runController(yawError * constants.MOTOR_SPEED_FACTOR, getYawMotorRPM(), timeError);
         yawMotorOutput = limitVal<float>(yawMotorPid.getOutput(), -constants.MAX_YAW_SPEED, constants.MAX_YAW_SPEED);
         if(-constants.MIN_YAW_SPEED < yawMotorOutput  && yawMotorOutput < constants.MIN_YAW_SPEED) yawMotorOutput = 0;
+        noTurn = false;
         //yawMotor.setDesiredOutput(yawMotorOutput);
     }
 }

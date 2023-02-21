@@ -31,9 +31,8 @@ public:
 
     void setYawAngle(float angle) { 
         if(angle > M_TWOPI) angle -= M_TWOPI;
-        else if(angle < 0) angle += 2* M_TWOPI;
+        else if(angle < 0) angle += M_TWOPI;
         targetYaw = angle;
-    
     }
 
     void setPitchAngle(float angle) {targetPitch = limitVal<float>(angle , constants.PITCH_MIN_ANGLE , 
@@ -102,6 +101,8 @@ private:
 
     //yaw flag to determine direction 1 = right 0 = left
     bool rightTurnFlag;
+    //yaw flag to determine if there is no turning at the moment
+    bool noTurn;
 
     //desired error angles
     float yawError;
